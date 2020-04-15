@@ -1,5 +1,4 @@
 info:
-  title: Single Private CloudSQL Posgres instance
   author: Google Inc.
   description: Creates a Cloud SQL with default security settings.
 
@@ -8,7 +7,6 @@ imports:
 
 required:
   - machinetype
-  - zone
 
 properties:
   machinetype:

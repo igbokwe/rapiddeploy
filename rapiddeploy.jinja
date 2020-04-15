@@ -10,7 +10,6 @@ resources:
           branchName: 'master'
       substitutions:
         _DEPLOYMENT: {{env["deployment"] }}
-        _BUCKET: {{ properties["bucket"] }}
       steps:
         - name: gcr.io/$PROJECT_ID/terraform
           args: ['init', '-input=false']

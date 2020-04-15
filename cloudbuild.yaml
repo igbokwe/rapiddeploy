@@ -1,0 +1,23 @@
+# In this directory, run the following command to build this builder.
+# $ gcloud builds submit . --config=cloudbuild.yaml --substitutions _BUCKET='<bucket name>'
+steps:
+- name: 'gcr.io/${PROJECT_ID}/terraform:0.12.20'
+  args: ['init',
+    '-backend-config=bucket=${_BUCKET}']
+  env:
+    - "TF_VAR_project-name=${PROJECT_ID}"
+- name: 'gcr.io/${PROJECT_ID}/terraform:0.12.20'
+  args: ['plan']
+  env:
+    - "TF_VAR_project-name=${PROJECT_ID}"
+- name: 'gcr.io/${PROJECT_ID}/terraform:0.12.20'
+  args: ['apply', '-auto-approve']
+  env:
+    - "TF_VAR_project-name=${PROJECT_ID}"
+- name: 'gcr.io/${PROJECT_ID}/terraform0.12.20'
+  args: ['destroy', '-auto-approve']
+  env:
+    - "TF_VAR_project-name=${PROJECT_ID}"
+substitutions:
+    _BUCKET:
+tags: ['cloud-builders-community']

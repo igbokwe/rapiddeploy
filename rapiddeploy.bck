@@ -1,0 +1,54 @@
+resources:
+  - name: 'rapid-rm'
+    action: 'CLOUD_BUILD_PROJECT/cloudbuild:cloudbuild.projects.builds.create'
+    properties:
+      projectId: 'CLOUD_BUILD_PROJECT'
+      source:
+        repoSource:
+          projectId: 'CLOUD_BUILD_PROJECT'
+          repoName: 'SOURCE_REPO_NAME'
+          branchName: 'master'
+      substitutions:
+        _DEPLOYMENT: {{ env["deployment"] }}
+        _ZONE: {{ properties["zone"] }}
+        _MACHINE_TYPE: {{ properties["machinetype"] }}
+      steps:
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['init', '-input=false']
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['workspace', 'new', '{{ env["deployment"] }}']
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['plan', '-input=false', '-out=tfplan','-var', 'deployment_name=${_DEPLOYMENT}', '-var', 'zone=${_ZONE}', '-var', 'machine_type=${_MACHINE_TYPE}']
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['apply', '-input=false', '-auto-approve', '-var', 'deployment_name=${_DEPLOYMENT}', '-var', 'zone=${_ZONE}', '-var', 'machine_type=${_MACHINE_TYPE}']
+      artifacts:
+        objects:
+            location: 'gs://INSERT_BUCKET_NAME/terraform/cloudbuild/apply/{{ env["deployment"] }}'
+            paths: ['tfplan']
+    metadata:
+      runtimePolicy:
+        - CREATE
+  - name: 'destroy-terraform'
+    action: 'CLOUD_BUILD_PROJECT/cloudbuild:cloudbuild.projects.builds.create'
+    properties:
+      projectId: 'CLOUD_BUILD_PROJECT'
+      source:
+        repoSource:
+          projectId: 'CLOUD_BUILD_PROJECT'
+          repoName: 'SOURCE_REPO_NAME'
+          branchName: 'master'
+      substitutions:
+        _DEPLOYMENT: {{ env["deployment"] }}
+        _ZONE: {{ properties["zone"] }}
+        _MACHINE_TYPE: {{ properties["machinetype"] }}
+      steps:
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['init', '-input=false']
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['workspace', 'select', '{{ env["deployment"] }}']
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['destroy', '-input=false', '-auto-approve', '-var', 'deployment_name=${_DEPLOYMENT}', '-var', 'zone=${_ZONE}', '-var', 'machine_type=${_MACHINE_TYPE}']
+    metadata:
+      runtimePolicy:
+        - DELETE
+

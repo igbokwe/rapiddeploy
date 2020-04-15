@@ -1,0 +1,51 @@
+resources:
+  - name: 'rapid-deploy'
+    action: 'igbokwe-test/cloudbuild:cloudbuild.projects.builds.create'
+    properties:
+      projectId: 'igbokwe-test'
+      source:
+        repoSource:
+          projectId: 'igbokwe-test'
+          repoName: 'rapiddeploy'
+          branchName: 'master'
+      substitutions:
+        _DEPLOYMENT: {{env["deployment"] }}
+        _BUCKET: {{ properties["bucket"] }}
+      steps:
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['init', '-input=false']
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['workspace', 'new', '{{ env["deployment"] }}']
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['plan', '-input=false', '-out=tfplan']
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['apply', '-input=false', '-auto-approve']
+      artifacts:
+        objects:
+            location: 'gs://rapiddeploy/terraform/cloudbuild/apply/{{ env["deployment"] }}'
+            paths: ['tfplan']
+    metadata:
+      runtimePolicy:
+        - CREATE
+  - name: 'destroy-terraform'
+    action: 'igbokwe-test/cloudbuild:cloudbuild.projects.builds.create'
+    properties:
+      projectId: 'igbokwe-test'
+      source:
+        repoSource:
+          projectId: 'igbokwe-test'
+          repoName: 'rapiddeploy'
+          branchName: 'master'
+      substitutions:
+        _DEPLOYMENT: {{ env["deployment"] }}
+      steps:
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['init', '-input=false']
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['workspace', 'select', '{{ env["deployment"] }}']
+        - name: gcr.io/$PROJECT_ID/terraform
+          args: ['destroy', '-input=false', '-auto-approve']
+    metadata:
+      runtimePolicy:
+        - DELETE
+

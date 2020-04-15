@@ -1,23 +1,9 @@
-provider "google" {
-  project     = "${var.project-name}"
-  region      = "${var.region}"
-}
+module "forseti" {
+      source  = "terraform-google-modules/forseti/google"
+      version = "~> 5.1"
 
-// Create a new instance
-resource "google_container_cluster" "terraform-builder-gcs-backend" {
-  name               = "terraform-builder-gcs-backend"
-  zone               = "${var.region}"
-  initial_node_count = "3"
-
-  node_config {
-    disk_size_gb  = "10"
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/compute",
-      "https://www.googleapis.com/auth/devstorage.read_only",
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
-    ]
-
-    tags = ["example"]
-  }
-}
+      gsuite_admin_email = "igbokwe@gmail.com"
+      domain             = "igbokwe.me"
+      project_id         = "igbokwe-test"
+      org_id             = "525342348260"
+    }

@@ -1,0 +1,22 @@
+info:
+  author: Google Inc.
+  description: Creates a Cloud SQL with default security settings.
+
+imports:
+    - path: rapiddeploy.jinja
+
+required:
+  - machinetype
+
+properties:
+  machinetype:
+    title: Machine type
+    type: string
+    enum:
+      - db-n1-standard-1
+      - db-n1-standard-2
+      - db-n1-standard-4
+      - db-n1-highmem-2
+      - db-n1-highmem-4
+      - db-n1-highmem-8
+      - db-f1-micro
